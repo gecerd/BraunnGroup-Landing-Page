@@ -129,10 +129,25 @@ const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className =
   );
 };
 
-// Car Modal Component with improved design
+// Car Modal Component - полностью переделанный дизайн
 const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void }> = ({ car, isOpen, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
+
+  // Закрытие по Escape
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   if (!car) return null;
 
@@ -161,30 +176,30 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative w-full max-w-7xl max-h-[95vh] bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200/50">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-5xl h-[90vh] sm:h-[85vh] bg-white rounded-2xl overflow-hidden shadow-2xl pointer-events-auto flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-20 w-10 h-10 bg-white hover:bg-slate-50 rounded-full flex items-center justify-center shadow-lg transition-all border border-slate-200 hover:border-slate-300"
+                className="absolute top-3 right-3 z-30 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all border border-slate-200"
                 aria-label="Закрыть"
               >
-                <X className="w-5 h-5 text-slate-700" strokeWidth={2} />
+                <X className="w-4 h-4 text-slate-700" strokeWidth={2.5} />
               </button>
 
-              <div className="flex flex-col lg:flex-row max-h-[95vh] overflow-hidden">
+              <div className="flex flex-col lg:flex-row h-full overflow-hidden">
                 {/* Image Gallery */}
-                <div className="relative lg:w-1/2 bg-gradient-to-br from-slate-50 to-slate-100">
-                  <div className="relative h-64 sm:h-80 md:h-96 lg:h-full min-h-[400px] lg:min-h-0">
+                <div className="relative lg:w-1/2 bg-slate-100 flex-shrink-0">
+                  <div className="relative w-full h-64 sm:h-80 lg:h-full">
                     {imageLoading && (
                       <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center">
                         <div className="w-16 h-16 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
@@ -208,19 +223,19 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                       <>
                         <button
                           onClick={prevImage}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-xl transition-all border border-slate-200 hover:border-slate-300 group"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all border border-slate-200 z-10"
                           aria-label="Предыдущее изображение"
                         >
-                          <ChevronLeft className="w-6 h-6 text-slate-700 group-hover:text-slate-900" strokeWidth={2} />
+                          <ChevronLeft className="w-5 h-5 text-slate-700" strokeWidth={2} />
                         </button>
                         <button
                           onClick={nextImage}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-xl transition-all border border-slate-200 hover:border-slate-300 group"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all border border-slate-200 z-10"
                           aria-label="Следующее изображение"
                         >
-                          <ChevronRight className="w-6 h-6 text-slate-700 group-hover:text-slate-900" strokeWidth={2} />
+                          <ChevronRight className="w-5 h-5 text-slate-700" strokeWidth={2} />
                         </button>
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full">
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-white/90 backdrop-blur-sm px-2 py-1.5 rounded-full">
                           {allImages.map((_, idx) => (
                             <button
                               key={idx}
@@ -228,8 +243,8 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                                 setCurrentImageIndex(idx);
                                 setImageLoading(true);
                               }}
-                              className={`h-2 rounded-full transition-all ${
-                                idx === currentImageIndex ? 'bg-slate-900 w-8' : 'bg-slate-400 w-2 hover:bg-slate-600'
+                              className={`h-1.5 rounded-full transition-all ${
+                                idx === currentImageIndex ? 'bg-slate-900 w-6' : 'bg-slate-400 w-1.5 hover:bg-slate-600'
                               }`}
                               aria-label={`Изображение ${idx + 1}`}
                             />
@@ -238,100 +253,74 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                       </>
                     )}
                   </div>
-                  {/* Thumbnail Gallery */}
-                  {allImages.length > 1 && (
-                    <div className="flex gap-3 p-4 overflow-x-auto bg-white/50 border-t border-slate-200/50 scrollbar-hide">
-                      {allImages.map((img, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setCurrentImageIndex(idx);
-                            setImageLoading(true);
-                          }}
-                          className={`flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border-2 transition-all shadow-sm ${
-                            idx === currentImageIndex 
-                              ? 'border-slate-900 shadow-md scale-105' 
-                              : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
-                          }`}
-                          aria-label={`Миниатюра ${idx + 1}`}
-                        >
-                          <img 
-                            src={img} 
-                            alt={`Миниатюра ${idx + 1}`} 
-                            className="w-full h-full object-cover" 
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* Car Details */}
-                <div className="lg:w-1/2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-                  <div className="p-6 sm:p-8 lg:p-10">
+                {/* Car Details - Scrollable */}
+                <div className="lg:w-1/2 flex flex-col min-h-0">
+                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
                     {/* Header */}
-                    <div className="mb-8">
-                      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 leading-tight">
+                    <div className="mb-4 sm:mb-6">
+                      <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1.5 leading-tight">
                         {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
                       </h2>
-                      <p className="text-lg sm:text-xl text-slate-500 font-medium">{car.model}</p>
+                      <p className="text-base sm:text-lg text-slate-500">{car.model}</p>
                     </div>
 
                     {/* Pricing */}
-                    <div className="mb-8 pb-8 border-b border-slate-200">
-                      <div className="flex items-baseline gap-3 mb-4">
-                        <span className="text-4xl sm:text-5xl font-bold text-slate-900">{car.priceDay}</span>
-                        <span className="text-xl sm:text-2xl text-slate-600 font-medium">AED</span>
-                        <span className="text-lg text-slate-500">/ день</span>
+                    <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200">
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <span className="text-3xl sm:text-4xl font-bold text-slate-900">{car.priceDay}</span>
+                        <span className="text-lg sm:text-xl text-slate-600 font-medium">AED</span>
+                        <span className="text-sm sm:text-base text-slate-500">/ день</span>
                         {car.oldPrice && (
-                          <span className="text-lg sm:text-xl text-slate-400 line-through ml-3">{car.oldPrice} AED</span>
+                          <span className="text-base sm:text-lg text-slate-400 line-through ml-2">{car.oldPrice} AED</span>
                         )}
                       </div>
-                      <div className="flex flex-wrap gap-4 sm:gap-6 text-sm sm:text-base">
-                        <div className="bg-slate-50 px-4 py-2 rounded-xl">
+                      <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
+                        <div className="bg-slate-50 px-3 py-1.5 rounded-lg">
                           <span className="text-slate-600">Неделя:</span>
-                          <span className="font-semibold text-slate-900 ml-2">{car.priceWeek} AED</span>
+                          <span className="font-semibold text-slate-900 ml-1.5">{car.priceWeek} AED</span>
                         </div>
-                        <div className="bg-slate-50 px-4 py-2 rounded-xl">
+                        <div className="bg-slate-50 px-3 py-1.5 rounded-lg">
                           <span className="text-slate-600">Месяц:</span>
-                          <span className="font-semibold text-slate-900 ml-2">{car.priceMonth} AED</span>
+                          <span className="font-semibold text-slate-900 ml-1.5">{car.priceMonth} AED</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Specs */}
-                    <div className="mb-8 pb-8 border-b border-slate-200">
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Характеристики</h3>
-                      <div className="grid grid-cols-3 gap-4 sm:gap-6">
-                        <div className="text-center p-4 bg-slate-50 rounded-2xl">
-                          <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                            <Gauge className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+                    <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Характеристики</h3>
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        <div className="text-center p-2 sm:p-3 bg-slate-50 rounded-xl">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                            <Gauge className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" strokeWidth={1.5} />
                           </div>
-                          <p className="text-xs sm:text-sm text-slate-600 font-medium">{car.specs.maxSpeed}</p>
+                          <p className="text-xs text-slate-600 font-medium leading-tight">{car.specs.maxSpeed}</p>
                         </div>
-                        <div className="text-center p-4 bg-slate-50 rounded-2xl">
-                          <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                            <Fuel className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+                        <div className="text-center p-2 sm:p-3 bg-slate-50 rounded-xl">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                            <Fuel className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" strokeWidth={1.5} />
                           </div>
-                          <p className="text-xs sm:text-sm text-slate-600 font-medium">{car.specs.fuelConsumption}</p>
+                          <p className="text-xs text-slate-600 font-medium leading-tight">{car.specs.fuelConsumption}</p>
                         </div>
-                        <div className="text-center p-4 bg-slate-50 rounded-2xl">
-                          <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                            <Route className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+                        <div className="text-center p-2 sm:p-3 bg-slate-50 rounded-xl">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                            <Route className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" strokeWidth={1.5} />
                           </div>
-                          <p className="text-xs sm:text-sm text-slate-600 font-medium">{car.specs.mileageLimit}</p>
+                          <p className="text-xs text-slate-600 font-medium leading-tight">{car.specs.mileageLimit}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Features */}
-                    <div className="mb-8 pb-8 border-b border-slate-200">
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Особенности</h3>
-                      <ul className="space-y-3">
+                    <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Особенности</h3>
+                      <ul className="space-y-2">
                         {car.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-3 text-sm sm:text-base text-slate-700">
-                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <Check className="w-4 h-4 text-green-600" strokeWidth={2.5} />
+                          <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
+                            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={2.5} />
                             </div>
                             <span className="leading-relaxed">{feature}</span>
                           </li>
@@ -340,39 +329,41 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                     </div>
 
                     {/* Conditions */}
-                    <div className="mb-8">
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Условия аренды</h3>
-                      <div className="space-y-3 bg-slate-50 p-5 rounded-2xl">
-                        <div className="flex items-center gap-3 text-sm sm:text-base text-slate-700">
-                          <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-                          <span>Возраст арендатора: <strong className="text-slate-900">от {car.conditions.minAge} года</strong></span>
+                    <div className="mb-4 sm:mb-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Условия аренды</h3>
+                      <div className="space-y-2 bg-slate-50 p-3 sm:p-4 rounded-xl">
+                        <div className="flex items-center gap-2.5 text-sm text-slate-700">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></div>
+                          <span>Возраст: <strong className="text-slate-900">от {car.conditions.minAge} года</strong></span>
                         </div>
-                        <div className="flex items-center gap-3 text-sm sm:text-base text-slate-700">
-                          <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-                          <span>Стаж вождения: <strong className="text-slate-900">от {car.conditions.minExperience} года</strong></span>
+                        <div className="flex items-center gap-2.5 text-sm text-slate-700">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></div>
+                          <span>Стаж: <strong className="text-slate-900">от {car.conditions.minExperience} года</strong></span>
                         </div>
-                        <div className="flex items-center gap-3 text-sm sm:text-base text-slate-700">
-                          <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-                          <span>Ограничение пробега: <strong className="text-slate-900">{car.conditions.mileageLimit}</strong></span>
+                        <div className="flex items-center gap-2.5 text-sm text-slate-700">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></div>
+                          <span>Пробег: <strong className="text-slate-900">{car.conditions.mileageLimit}</strong></span>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    {/* CTA Button */}
+                  {/* Fixed CTA Button */}
+                  <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 bg-white">
                     <a
                       href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                      className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg"
                     >
-                      <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                       Забронировать в WhatsApp
                     </a>
                   </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
@@ -943,92 +934,84 @@ export function RentPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {cars.map((car, index) => (
               <motion.div
                 key={car.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden border border-slate-200/50 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group"
-                whileHover={{ y: -8 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer group flex flex-col"
+                whileHover={{ y: -4 }}
                 onClick={() => openModal(car)}
               >
                 {/* Car Image */}
-                <div className="relative h-56 sm:h-64 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+                <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
                   <CarImage
                     car={car}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   {car.oldPrice && (
-                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                    <div className="absolute top-3 right-3 bg-red-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
                       -{Math.round((1 - car.priceDay / car.oldPrice) * 100)}%
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
                 {/* Car Info */}
-                <div className="p-6 sm:p-7">
-                  <div className="mb-5">
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1.5 leading-tight">
+                <div className="p-4 sm:p-5 flex-1 flex flex-col">
+                  <div className="mb-3">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1 leading-tight">
                       {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
                     </h3>
-                    <p className="text-sm sm:text-base text-slate-500 font-medium">{car.model}</p>
+                    <p className="text-xs sm:text-sm text-slate-500">{car.model}</p>
                   </div>
 
-                  {/* Specs */}
-                  <div className="grid grid-cols-3 gap-3 mb-5 pb-5 border-b border-slate-200">
-                    <div className="text-center p-2 bg-slate-50 rounded-xl">
-                      <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                        <Gauge className="w-4 h-4 text-slate-600" strokeWidth={2} />
-                      </div>
-                      <p className="text-xs text-slate-700 font-medium leading-tight">{car.specs.maxSpeed}</p>
+                  {/* Specs - Compact */}
+                  <div className="grid grid-cols-3 gap-2 mb-3 pb-3 border-b border-slate-200">
+                    <div className="text-center">
+                      <Gauge className="w-4 h-4 text-slate-500 mx-auto mb-1" strokeWidth={2} />
+                      <p className="text-xs text-slate-600 leading-tight">{car.specs.maxSpeed}</p>
                     </div>
-                    <div className="text-center p-2 bg-slate-50 rounded-xl">
-                      <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                        <Fuel className="w-4 h-4 text-slate-600" strokeWidth={2} />
-                      </div>
-                      <p className="text-xs text-slate-700 font-medium leading-tight">{car.specs.fuelConsumption}</p>
+                    <div className="text-center">
+                      <Fuel className="w-4 h-4 text-slate-500 mx-auto mb-1" strokeWidth={2} />
+                      <p className="text-xs text-slate-600 leading-tight">{car.specs.fuelConsumption}</p>
                     </div>
-                    <div className="text-center p-2 bg-slate-50 rounded-xl">
-                      <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                        <Route className="w-4 h-4 text-slate-600" strokeWidth={2} />
-                      </div>
-                      <p className="text-xs text-slate-700 font-medium leading-tight">{car.specs.mileageLimit}</p>
+                    <div className="text-center">
+                      <Route className="w-4 h-4 text-slate-500 mx-auto mb-1" strokeWidth={2} />
+                      <p className="text-xs text-slate-600 leading-tight">{car.specs.mileageLimit}</p>
                     </div>
                   </div>
 
-                  {/* Pricing */}
-                  <div className="mb-5">
-                    <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-3xl sm:text-4xl font-bold text-slate-900">
+                  {/* Pricing - Compact */}
+                  <div className="mb-3 flex-1">
+                    <div className="flex items-baseline gap-1.5 mb-2">
+                      <span className="text-2xl sm:text-3xl font-bold text-slate-900">
                         {car.priceDay}
                       </span>
-                      <span className="text-lg text-slate-600 font-medium">AED</span>
-                      <span className="text-sm text-slate-500">/ день</span>
+                      <span className="text-sm sm:text-base text-slate-600 font-medium">AED</span>
+                      <span className="text-xs text-slate-500">/день</span>
                       {car.oldPrice && (
-                        <span className="text-sm text-slate-400 line-through ml-2">
-                          {car.oldPrice} AED
+                        <span className="text-xs text-slate-400 line-through ml-1.5">
+                          {car.oldPrice}
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-3 text-xs sm:text-sm text-slate-600">
-                      <span className="bg-slate-50 px-3 py-1 rounded-lg">Неделя: <strong className="text-slate-900">{car.priceWeek}</strong> AED</span>
-                      <span className="bg-slate-50 px-3 py-1 rounded-lg">Месяц: <strong className="text-slate-900">{car.priceMonth}</strong> AED</span>
+                    <div className="flex gap-2 text-xs text-slate-600">
+                      <span>Неделя: <strong className="text-slate-900">{car.priceWeek}</strong></span>
+                      <span>•</span>
+                      <span>Месяц: <strong className="text-slate-900">{car.priceMonth}</strong></span>
                     </div>
                   </div>
 
-                  {/* Features Preview */}
-                  <div className="mb-5">
-                    <ul className="space-y-2">
-                      {car.features.slice(0, 3).map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
-                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={2.5} />
-                          </div>
-                          <span className="leading-relaxed">{feature}</span>
+                  {/* Features Preview - Compact */}
+                  <div className="mb-3">
+                    <ul className="space-y-1">
+                      {car.features.slice(0, 2).map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+                          <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                          <span className="leading-tight line-clamp-1">{feature}</span>
                         </li>
                       ))}
                     </ul>
@@ -1039,11 +1022,11 @@ export function RentPage() {
                     href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Забронировать в WhatsApp
+                    <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    Забронировать
                   </a>
                 </div>
               </motion.div>
