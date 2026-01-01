@@ -56,7 +56,7 @@ export function Hero({ onNavigate }: HeroProps) {
             </p>
 
             <motion.a
-              href="https://wa.me/"
+              href="https://wa.me/971585717758"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 hover:bg-slate-800 text-white transition-all text-xs sm:text-sm tracking-wider rounded-full"
@@ -135,6 +135,14 @@ export function Hero({ onNavigate }: HeroProps) {
             <p className="text-base sm:text-lg text-slate-700 font-medium">
               Ваш надежный партнер в Объединенных Арабских Эмиратах
             </p>
+            <div className="pt-4 space-y-2">
+              <p className="text-sm sm:text-base text-slate-600">
+                Телефон: <a href="tel:+971585717758" className="text-slate-900 hover:text-slate-700 font-medium">+971 58 571 7758</a>
+              </p>
+              <p className="text-sm sm:text-base text-slate-600">
+                Телефон: <a href="tel:+971561570703" className="text-slate-900 hover:text-slate-700 font-medium">+971 56 157 0703</a>
+              </p>
+            </div>
           </motion.div>
         </div>
       </footer>

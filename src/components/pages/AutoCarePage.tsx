@@ -74,7 +74,7 @@ export function AutoCarePage() {
             Подписка на обслуживание автомобиля
           </p>
           <motion.a
-            href="https://wa.me/"
+            href="https://wa.me/971585717758"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-8 sm:px-12 py-3 sm:py-4 bg-white text-slate-900 hover:bg-slate-100 transition-all text-xs sm:text-sm tracking-wider rounded-full"
@@ -151,7 +151,7 @@ export function AutoCarePage() {
                   ))}
                 </ul>
                 <a
-                  href="https://wa.me/"
+                  href="https://wa.me/971585717758"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`block w-full py-3 text-center transition-all text-xs sm:text-sm tracking-wider rounded-full ${

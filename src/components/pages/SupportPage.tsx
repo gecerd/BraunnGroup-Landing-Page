@@ -57,7 +57,7 @@ export function SupportPage() {
             Полное сопровождение в решении юридических и административных вопросов в ОАЭ
           </p>
           <motion.a
-            href="https://wa.me/"
+            href="https://wa.me/971585717758"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-8 sm:px-12 py-3 sm:py-4 bg-white text-slate-900 hover:bg-slate-100 transition-all text-xs sm:text-sm tracking-wider rounded-full"
@@ -127,7 +127,7 @@ export function SupportPage() {
               Наши специалисты помогут решить любые юри��ические и административные вопросы в кратчайшие сроки
             </p>
             <a
-              href="https://wa.me/"
+              href="https://wa.me/971585717758"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 text-white hover:bg-slate-800 transition-all text-xs sm:text-sm tracking-wider rounded-full"
