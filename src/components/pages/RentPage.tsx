@@ -653,80 +653,83 @@ export function RentPage() {
                 className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-lg group flex flex-col"
                 whileHover={{ y: -4 }}
               >
-                {/* Car Image */}
-                <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
+                {/* Car Image - Large */}
+                <div className="relative h-64 sm:h-72 lg:h-80 overflow-hidden bg-slate-100">
                   <CarImage
                     car={car}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   {car.oldPrice && (
-                    <div className="absolute top-3 right-3 bg-red-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
                       -{Math.round((1 - car.priceDay / car.oldPrice) * 100)}%
                     </div>
                   )}
                 </div>
 
-                {/* Additional Car Image */}
-                <div className="relative h-32 sm:h-36 overflow-hidden bg-slate-100">
-                  <CarImage
-                    car={car}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-
-                {/* Car Info */}
-                <div className="p-4 sm:p-5 flex-1 flex flex-col">
-                  <div className="mb-3">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1 leading-tight">
+                {/* White Info Block */}
+                <div className="bg-white p-5 sm:p-6 flex-1 flex flex-col">
+                  {/* Car Title */}
+                  <div className="mb-4">
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1 leading-tight">
                       {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
                     </h3>
-                    <p className="text-xs sm:text-sm text-slate-500">{car.model}</p>
+                    <p className="text-sm text-slate-500">{car.model}</p>
                   </div>
 
-                  {/* Pricing - Compact */}
-                  <div className="mb-3 flex-1">
-                    <div className="flex items-baseline gap-1.5 mb-2">
-                      <span className="text-2xl sm:text-3xl font-bold text-slate-900">
+                  {/* Specs */}
+                  <div className="mb-4 pb-4 border-b border-slate-200">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center">
+                        <p className="text-xs sm:text-sm text-slate-600 mb-1">Максимальная скорость</p>
+                        <p className="text-sm sm:text-base font-semibold text-slate-900">{car.specs.maxSpeed}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs sm:text-sm text-slate-600 mb-1">Средний расход топлива</p>
+                        <p className="text-sm sm:text-base font-semibold text-slate-900">{car.specs.fuelConsumption}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs sm:text-sm text-slate-600 mb-1">Ограничение пробега</p>
+                        <p className="text-sm sm:text-base font-semibold text-slate-900">{car.specs.mileageLimit}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="mb-4">
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-3xl sm:text-4xl font-bold text-slate-900">
                         {car.priceDay}
                       </span>
-                      <span className="text-sm sm:text-base text-slate-600 font-medium">AED</span>
-                      <span className="text-xs text-slate-500">/день</span>
+                      <span className="text-lg sm:text-xl text-slate-600 font-medium">AED</span>
+                      <span className="text-sm text-slate-500">.</span>
                       {car.oldPrice && (
-                        <span className="text-xs text-slate-400 line-through ml-1.5">
-                          {car.oldPrice}
+                        <span className="text-lg sm:text-xl text-slate-400 line-through ml-2">
+                          {car.oldPrice} AED.
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-2 text-xs text-slate-600">
-                      <span>Неделя: <strong className="text-slate-900">{car.priceWeek}</strong></span>
-                      <span>•</span>
-                      <span>Месяц: <strong className="text-slate-900">{car.priceMonth}</strong></span>
+                    <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                      <span>Сутки - <strong className="text-slate-900">{car.priceDay} aed</strong></span>
+                      <span>Неделя - <strong className="text-slate-900">{car.priceWeek} aed</strong></span>
+                      <span>Месяц - <strong className="text-slate-900">{car.priceMonth} aed</strong></span>
                     </div>
                   </div>
 
-                  {/* Features Preview - Compact */}
-                  <div className="mb-3">
-                    <ul className="space-y-1">
-                      {car.features.slice(0, 2).map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
-                          <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                          <span className="leading-tight line-clamp-1">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  {/* Buttons */}
+                  <div className="flex gap-3 mt-auto">
+                    <button className="flex-1 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all duration-200 text-sm font-semibold">
+                      Подробнее
+                    </button>
+                    <a
+                      href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-900 hover:bg-slate-50 text-slate-900 rounded-lg transition-all duration-200 text-sm font-semibold"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </a>
                   </div>
-
-                  {/* CTA Button */}
-                  <a
-                    href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    Забронировать
-                  </a>
                 </div>
               </motion.div>
             ))}
@@ -784,4 +787,5 @@ export function RentPage() {
       </section>
     </div>
   );
+}
 }
