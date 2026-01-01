@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Clock, Shield, Star, Check, Gauge, Fuel, Route, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Clock, Shield, Star, Check, Gauge, Fuel, Route, MessageCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 interface Car {
   id: string;
@@ -9,6 +10,7 @@ interface Car {
   year: number;
   color: string;
   image: string;
+  images?: string[]; // Array of additional images for gallery
   priceDay: number;
   priceWeek: number;
   priceMonth: number;
@@ -67,15 +69,35 @@ const getFallbackImage = (car: Car): string => {
   return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
 };
 
+// Helper function to get local image path
+const getLocalImagePath = (carId: string, index: number = 0): string | null => {
+  // Try to load from local images
+  try {
+    // In production, these will be in public/cars/
+    const imagePath = `/cars/${carId}${index > 0 ? `-${index}` : ''}.jpg`;
+    return imagePath;
+  } catch {
+    return null;
+  }
+};
+
 // Car Image Component with fallback
 const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className = '' }) => {
-  const [imgSrc, setImgSrc] = useState(car.image);
+  // Try local image first, then remote, then fallback
+  const localImage = getLocalImagePath(car.id);
+  const [imgSrc, setImgSrc] = useState(localImage || car.image);
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
-      setImgSrc(getFallbackImage(car));
+      // Try remote image if local failed
+      if (localImage && imgSrc === localImage) {
+        setImgSrc(car.image);
+      } else {
+        // Use fallback
+        setImgSrc(getFallbackImage(car));
+      }
     }
   };
 
@@ -90,7 +112,228 @@ const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className =
   );
 };
 
+// Car Modal Component
+const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void }> = ({ car, isOpen, onClose }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  if (!car) return null;
+
+  const allImages = car.images && car.images.length > 0 ? car.images : [car.image];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+              >
+                <X className="w-5 h-5 text-slate-900" />
+              </button>
+
+              <div className="flex flex-col lg:flex-row max-h-[90vh] overflow-hidden">
+                {/* Image Gallery */}
+                <div className="relative lg:w-1/2 bg-slate-100">
+                  <div className="relative h-64 sm:h-96 lg:h-full aspect-square lg:aspect-auto">
+                    <img
+                      src={allImages[currentImageIndex]}
+                      alt={`${car.name} ${car.color} ${car.year} - Image ${currentImageIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {allImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={prevImage}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+                        >
+                          <ChevronLeft className="w-5 h-5 text-slate-900" />
+                        </button>
+                        <button
+                          onClick={nextImage}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+                        >
+                          <ChevronRight className="w-5 h-5 text-slate-900" />
+                        </button>
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                          {allImages.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setCurrentImageIndex(idx)}
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                idx === currentImageIndex ? 'bg-white w-8' : 'bg-white/50'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {/* Thumbnail Gallery */}
+                  {allImages.length > 1 && (
+                    <div className="flex gap-2 p-4 overflow-x-auto bg-white border-t border-slate-200">
+                      {allImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentImageIndex(idx)}
+                          className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                            idx === currentImageIndex ? 'border-slate-900' : 'border-transparent opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Car Details */}
+                <div className="lg:w-1/2 overflow-y-auto">
+                  <div className="p-6 sm:p-8">
+                    <div className="mb-6">
+                      <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
+                        {car.name} {car.color} {car.year}
+                      </h2>
+                      <p className="text-lg text-slate-500">{car.model}</p>
+                    </div>
+
+                    {/* Pricing */}
+                    <div className="mb-6 pb-6 border-b border-slate-200">
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-4xl font-bold text-slate-900">{car.priceDay} AED</span>
+                        <span className="text-lg text-slate-500">/ день</span>
+                        {car.oldPrice && (
+                          <span className="text-lg text-slate-400 line-through ml-2">{car.oldPrice} AED</span>
+                        )}
+                      </div>
+                      <div className="flex gap-6 text-sm text-slate-600">
+                        <div>
+                          <span className="font-semibold">Неделя:</span> {car.priceWeek} AED
+                        </div>
+                        <div>
+                          <span className="font-semibold">Месяц:</span> {car.priceMonth} AED
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Specs */}
+                    <div className="mb-6 pb-6 border-b border-slate-200">
+                      <h3 className="text-xl font-semibold text-slate-900 mb-4">Характеристики</h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <Gauge className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                          <p className="text-sm text-slate-600">{car.specs.maxSpeed}</p>
+                        </div>
+                        <div className="text-center">
+                          <Fuel className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                          <p className="text-sm text-slate-600">{car.specs.fuelConsumption}</p>
+                        </div>
+                        <div className="text-center">
+                          <Route className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                          <p className="text-sm text-slate-600">{car.specs.mileageLimit}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Features */}
+                    <div className="mb-6 pb-6 border-b border-slate-200">
+                      <h3 className="text-xl font-semibold text-slate-900 mb-4">Особенности</h3>
+                      <ul className="space-y-2">
+                        {car.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                            <Check className="w-5 h-5 text-slate-900 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Conditions */}
+                    <div className="mb-6">
+                      <h3 className="text-xl font-semibold text-slate-900 mb-4">Условия аренды</h3>
+                      <ul className="space-y-2 text-sm text-slate-700">
+                        <li>Возраст арендатора: от {car.conditions.minAge} года</li>
+                        <li>Стаж вождения: от {car.conditions.minExperience} года</li>
+                        <li>Ограничение пробега: {car.conditions.mileageLimit}</li>
+                      </ul>
+                    </div>
+
+                    {/* CTA Button */}
+                    <a
+                      href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-base font-semibold"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      Забронировать в WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
 export function RentPage() {
+  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [carImagesMap, setCarImagesMap] = useState<Record<string, string[]>>({});
+
+  // Load images.json if available
+  React.useEffect(() => {
+    fetch('/cars/images.json')
+      .then(res => res.json())
+      .then(data => setCarImagesMap(data))
+      .catch(() => {
+        // File doesn't exist or failed to load, that's okay
+        console.log('images.json not found, using default images');
+      });
+  }, []);
+
+  const openModal = (car: Car) => {
+    // Load local images if available
+    const localImages = carImagesMap[car.id];
+    const carWithImages = localImages && localImages.length > 0
+      ? { ...car, images: localImages }
+      : car;
+    
+    setSelectedCar(carWithImages);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedCar(null), 300);
+  };
+
   const cars: Car[] = [
     {
       id: 'mg3-blue',
@@ -631,7 +874,8 @@ export function RentPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden border border-slate-200/50 hover:border-slate-900/50 transition-all duration-300 shadow-sm hover:shadow-lg"
+                className="bg-white rounded-3xl overflow-hidden border border-slate-200/50 hover:border-slate-900/50 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer"
+                onClick={() => openModal(car)}
               >
                 {/* Car Image */}
                 <div className="relative h-48 sm:h-56 overflow-hidden bg-slate-100">
@@ -718,6 +962,9 @@ export function RentPage() {
           </div>
         </div>
       </section>
+
+      {/* Car Modal */}
+      <CarModal car={selectedCar} isOpen={isModalOpen} onClose={closeModal} />
 
       {/* Features */}
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
