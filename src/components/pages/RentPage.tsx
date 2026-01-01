@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Clock, Shield, Star, Check, MessageCircle } from 'lucide-react';
+import { Clock, Shield, Check, MessageCircle, Headphones, CreditCard, Settings } from 'lucide-react';
 
 interface Car {
   id: string;
@@ -578,9 +578,9 @@ export function RentPage() {
   ];
 
   const benefits = [
-    { icon: Clock, title: 'Быстро', description: 'Оформление за 30 минут' },
-    { icon: Shield, title: 'Надёжно', description: 'Полная страховка включена' },
-    { icon: Star, title: 'Премиум', description: 'Только новые автомобили' },
+    { icon: Headphones, title: 'Быстро', description: 'Поддержка клиентов 24/7' },
+    { icon: CreditCard, title: 'Надежно', description: 'Расчеты с клиентами максимально просты и удобны.' },
+    { icon: Settings, title: 'Удобно', description: 'Гибкие условия аренды' },
   ];
 
   return (
