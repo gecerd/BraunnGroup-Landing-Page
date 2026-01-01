@@ -1,8 +1,192 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Clock, Shield, Star, Check } from 'lucide-react';
+import { Clock, Shield, Star, Check, Gauge, Fuel, Route, MessageCircle } from 'lucide-react';
+
+interface Car {
+  id: string;
+  name: string;
+  model: string;
+  year: number;
+  color: string;
+  image: string;
+  priceDay: number;
+  priceWeek: number;
+  priceMonth: number;
+  oldPrice?: number;
+  specs: {
+    maxSpeed: string;
+    fuelConsumption: string;
+    mileageLimit: string;
+  };
+  features: string[];
+  conditions: {
+    minAge: number;
+    minExperience: number;
+    mileageLimit: string;
+  };
+}
 
 export function RentPage() {
+  const cars: Car[] = [
+    {
+      id: 'mg3-blue',
+      name: 'MG 3',
+      model: 'MG 3',
+      year: 2024,
+      color: 'Blue',
+      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80',
+      priceDay: 145,
+      priceWeek: 890,
+      priceMonth: 2250,
+      oldPrice: 180,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '7,7 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Современный дизайн',
+        'Экономичный двигатель',
+        'Просторный салон',
+        'Большой сенсорный экран',
+        'Bluetooth & USB',
+        'Система Isofix',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg3-black',
+      name: 'MG 3',
+      model: 'MG 3',
+      year: 2024,
+      color: 'Black',
+      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80',
+      priceDay: 145,
+      priceWeek: 890,
+      priceMonth: 2250,
+      oldPrice: 180,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '7,7 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Современный дизайн',
+        'Экономичный двигатель',
+        'Просторный салон',
+        'Большой сенсорный экран',
+        'Bluetooth & USB',
+        'Система Isofix',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg3-grey',
+      name: 'MG 3',
+      model: 'MG 3',
+      year: 2024,
+      color: 'Grey',
+      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80',
+      priceDay: 145,
+      priceWeek: 890,
+      priceMonth: 2250,
+      oldPrice: 180,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '7,7 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Современный дизайн',
+        'Экономичный двигатель',
+        'Просторный салон',
+        'Большой сенсорный экран',
+        'Bluetooth & USB',
+        'Система Isofix',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg5-silver',
+      name: 'MG 5',
+      model: 'MG 5',
+      year: 2023,
+      color: 'Silver',
+      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80&auto=format',
+      priceDay: 200,
+      priceWeek: 1200,
+      priceMonth: 3000,
+      specs: {
+        maxSpeed: '~170 км/час',
+        fuelConsumption: '8,2 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Просторный салон и багажник',
+        'Экономичный двигатель 1.5L Turbo',
+        'Мощный кондиционер',
+        'Большой сенсорный экран',
+        'Apple CarPlay и Android Auto',
+        'Камера заднего вида',
+        'Bluetooth & USB',
+        'Электропакет',
+        'Система Isofix',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'jetour-t2',
+      name: 'JETOUR T2',
+      model: 'JETOUR T2',
+      year: 2026,
+      color: 'Sand',
+      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop&q=80&auto=format',
+      priceDay: 533,
+      priceWeek: 3240,
+      priceMonth: 8000,
+      oldPrice: 600,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '9,3 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Внедорожный дизайн',
+        'Полный привод',
+        'Просторный салон с премиальной отделкой',
+        'Мощный турбированный двигатель 2.0L',
+        'Панорамная камера 360°',
+        'Большой сенсорный экран',
+        'Apple CarPlay и Android Auto',
+        'Продвинутые системы безопасности (ADAS)',
+        'Мощный климат-контроль',
+        'Беспроводная зарядка',
+        'Система Isofix',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+  ];
+
   const features = [
     'Широкий выбор автомобилей премиум-класса',
     'Аренда от 1 дня до нескольких месяцев',
@@ -81,8 +265,122 @@ export function RentPage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Cars Grid */}
       <section className="py-16 sm:py-20 lg:py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-slate-900 mb-4 sm:mb-6">Наш автопарк</h2>
+            <div className="w-12 sm:w-16 h-px bg-slate-900 mx-auto"></div>
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mt-6">
+              Выберите автомобиль, который идеально подходит для ваших потребностей
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {cars.map((car, index) => (
+              <motion.div
+                key={car.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="bg-white rounded-3xl overflow-hidden border border-slate-200/50 hover:border-slate-900/50 transition-all duration-300 shadow-sm hover:shadow-lg"
+              >
+                {/* Car Image */}
+                <div className="relative h-48 sm:h-56 overflow-hidden bg-slate-100">
+                  <img
+                    src={car.image}
+                    alt={`${car.name} ${car.color} ${car.year}`}
+                    className="w-full h-full object-cover"
+                  />
+                  {car.oldPrice && (
+                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                      -{Math.round((1 - car.priceDay / car.oldPrice) * 100)}%
+                    </div>
+                  )}
+                </div>
+
+                {/* Car Info */}
+                <div className="p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">
+                      {car.name} {car.color} {car.year}
+                    </h3>
+                    <p className="text-sm text-slate-500">{car.model}</p>
+                  </div>
+
+                  {/* Specs */}
+                  <div className="grid grid-cols-3 gap-3 mb-4 pb-4 border-b border-slate-200">
+                    <div className="text-center">
+                      <Gauge className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                      <p className="text-xs text-slate-600">{car.specs.maxSpeed}</p>
+                    </div>
+                    <div className="text-center">
+                      <Fuel className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                      <p className="text-xs text-slate-600">{car.specs.fuelConsumption}</p>
+                    </div>
+                    <div className="text-center">
+                      <Route className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                      <p className="text-xs text-slate-600">{car.specs.mileageLimit}</p>
+                    </div>
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="mb-4">
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-2xl sm:text-3xl font-bold text-slate-900">
+                        {car.priceDay} AED
+                      </span>
+                      <span className="text-sm text-slate-500">/ день</span>
+                      {car.oldPrice && (
+                        <span className="text-sm text-slate-400 line-through ml-2">
+                          {car.oldPrice} AED
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-4 text-xs text-slate-600">
+                      <span>Неделя: {car.priceWeek} AED</span>
+                      <span>Месяц: {car.priceMonth} AED</span>
+                    </div>
+                  </div>
+
+                  {/* Features Preview */}
+                  <div className="mb-4">
+                    <ul className="space-y-1">
+                      {car.features.slice(0, 3).map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
+                          <Check className="w-4 h-4 text-slate-900 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* CTA Button */}
+                  <a
+                    href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-sm font-semibold"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Забронировать в WhatsApp
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
