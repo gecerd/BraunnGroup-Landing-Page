@@ -70,38 +70,17 @@ const getFallbackImage = (car: Car): string => {
 
 // Car Image Component with improved fallback
 const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className = '' }) => {
-  // Start with fallback image directly since brauncar.com images may not be accessible
   const fallback = getFallbackImage(car);
-  const [imgSrc, setImgSrc] = useState<string>(fallback);
-  const [hasError, setHasError] = useState(false);
+  // Start with the car's image (local webp file)
+  const [imgSrc, setImgSrc] = useState<string>(car.image);
   const [loading, setLoading] = useState(true);
-  const [attempts, setAttempts] = useState(0);
-
-  React.useEffect(() => {
-    // Try to load the original image first
-    const img = new Image();
-    img.onload = () => {
-      setImgSrc(car.image);
-      setLoading(false);
-    };
-    img.onerror = () => {
-      // If original fails, use fallback
-      setImgSrc(fallback);
-      setLoading(false);
-    };
-    img.src = car.image;
-  }, [car.image, fallback]);
 
   const handleError = () => {
-    if (attempts < 2) {
-      setAttempts(prev => prev + 1);
-      // Try fallback image
-      if (imgSrc !== fallback) {
-        setImgSrc(fallback);
-        setHasError(false);
-      }
+    // If local image fails, try fallback
+    if (imgSrc !== fallback) {
+      setImgSrc(fallback);
+      setLoading(false);
     } else {
-      setHasError(true);
       setLoading(false);
     }
   };
