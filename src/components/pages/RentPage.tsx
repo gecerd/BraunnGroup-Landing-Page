@@ -68,52 +68,71 @@ const getFallbackImage = (car: Car): string => {
   return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
 };
 
-// Helper function to get local image path
-const getLocalImagePath = (carId: string, index: number = 0): string | null => {
-  // Try to load from local images
-  try {
-    // In production, these will be in public/cars/
-    const imagePath = `/cars/${carId}${index > 0 ? `-${index}` : ''}.jpg`;
-    return imagePath;
-  } catch {
-    return null;
-  }
-};
-
-// Car Image Component with fallback
+// Car Image Component with improved fallback
 const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className = '' }) => {
-  // Try local image first, then remote, then fallback
-  const localImage = getLocalImagePath(car.id);
-  const [imgSrc, setImgSrc] = useState(localImage || car.image);
+  // Start with fallback image directly since brauncar.com images may not be accessible
+  const fallback = getFallbackImage(car);
+  const [imgSrc, setImgSrc] = useState<string>(fallback);
   const [hasError, setHasError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [attempts, setAttempts] = useState(0);
+
+  React.useEffect(() => {
+    // Try to load the original image first
+    const img = new Image();
+    img.onload = () => {
+      setImgSrc(car.image);
+      setLoading(false);
+    };
+    img.onerror = () => {
+      // If original fails, use fallback
+      setImgSrc(fallback);
+      setLoading(false);
+    };
+    img.src = car.image;
+  }, [car.image, fallback]);
 
   const handleError = () => {
-    if (!hasError) {
-      setHasError(true);
-      // Try remote image if local failed
-      if (localImage && imgSrc === localImage) {
-        setImgSrc(car.image);
-      } else {
-        // Use fallback
-        setImgSrc(getFallbackImage(car));
+    if (attempts < 2) {
+      setAttempts(prev => prev + 1);
+      // Try fallback image
+      if (imgSrc !== fallback) {
+        setImgSrc(fallback);
+        setHasError(false);
       }
+    } else {
+      setHasError(true);
+      setLoading(false);
     }
   };
 
+  const handleLoad = () => {
+    setLoading(false);
+  };
+
   return (
-    <img
-      src={imgSrc}
-      alt={`${car.name} ${car.color} ${car.year}`}
-      className={className}
-      onError={handleError}
-      loading="lazy"
-    />
+    <div className="relative w-full h-full">
+      {loading && (
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 animate-pulse flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-slate-400 border-t-slate-700 rounded-full animate-spin"></div>
+        </div>
+      )}
+      <img
+        src={imgSrc}
+        alt={`${car.name} ${car.color} ${car.year}`}
+        className={`${className} ${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+        onError={handleError}
+        onLoad={handleLoad}
+        loading="lazy"
+      />
+    </div>
   );
 };
 
-// Car Modal Component
+// Car Modal Component with improved design
 const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void }> = ({ car, isOpen, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageLoading, setImageLoading] = useState(true);
 
   if (!car) return null;
 
@@ -121,10 +140,16 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+    setImageLoading(true);
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+    setImageLoading(true);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
   };
 
   return (
@@ -142,49 +167,71 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative w-full max-w-7xl max-h-[95vh] bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200/50">
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+                className="absolute top-4 right-4 z-20 w-10 h-10 bg-white hover:bg-slate-50 rounded-full flex items-center justify-center shadow-lg transition-all border border-slate-200 hover:border-slate-300"
+                aria-label="Закрыть"
               >
-                <X className="w-5 h-5 text-slate-900" />
+                <X className="w-5 h-5 text-slate-700" strokeWidth={2} />
               </button>
 
-              <div className="flex flex-col lg:flex-row max-h-[90vh] overflow-hidden">
+              <div className="flex flex-col lg:flex-row max-h-[95vh] overflow-hidden">
                 {/* Image Gallery */}
-                <div className="relative lg:w-1/2 bg-slate-100">
-                  <div className="relative h-64 sm:h-96 lg:h-full aspect-square lg:aspect-auto">
+                <div className="relative lg:w-1/2 bg-gradient-to-br from-slate-50 to-slate-100">
+                  <div className="relative h-64 sm:h-80 md:h-96 lg:h-full min-h-[400px] lg:min-h-0">
+                    {imageLoading && (
+                      <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center">
+                        <div className="w-16 h-16 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                      </div>
+                    )}
                     <img
                       src={allImages[currentImageIndex]}
-                      alt={`${car.name} ${car.color} ${car.year} - Image ${currentImageIndex + 1}`}
-                      className="w-full h-full object-cover"
+                      alt={`${car.name} ${car.color} ${car.year} - Изображение ${currentImageIndex + 1}`}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                      onLoad={handleImageLoad}
+                      onError={() => {
+                        setImageLoading(false);
+                        // Try fallback
+                        const fallback = getFallbackImage(car);
+                        if (fallback !== allImages[currentImageIndex]) {
+                          allImages[currentImageIndex] = fallback;
+                        }
+                      }}
                     />
                     {allImages.length > 1 && (
                       <>
                         <button
                           onClick={prevImage}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-xl transition-all border border-slate-200 hover:border-slate-300 group"
+                          aria-label="Предыдущее изображение"
                         >
-                          <ChevronLeft className="w-5 h-5 text-slate-900" />
+                          <ChevronLeft className="w-6 h-6 text-slate-700 group-hover:text-slate-900" strokeWidth={2} />
                         </button>
                         <button
                           onClick={nextImage}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/95 hover:bg-white rounded-full flex items-center justify-center shadow-xl transition-all border border-slate-200 hover:border-slate-300 group"
+                          aria-label="Следующее изображение"
                         >
-                          <ChevronRight className="w-5 h-5 text-slate-900" />
+                          <ChevronRight className="w-6 h-6 text-slate-700 group-hover:text-slate-900" strokeWidth={2} />
                         </button>
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-full">
                           {allImages.map((_, idx) => (
                             <button
                               key={idx}
-                              onClick={() => setCurrentImageIndex(idx)}
-                              className={`w-2 h-2 rounded-full transition-all ${
-                                idx === currentImageIndex ? 'bg-white w-8' : 'bg-white/50'
+                              onClick={() => {
+                                setCurrentImageIndex(idx);
+                                setImageLoading(true);
+                              }}
+                              className={`h-2 rounded-full transition-all ${
+                                idx === currentImageIndex ? 'bg-slate-900 w-8' : 'bg-slate-400 w-2 hover:bg-slate-600'
                               }`}
+                              aria-label={`Изображение ${idx + 1}`}
                             />
                           ))}
                         </div>
@@ -193,16 +240,26 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                   </div>
                   {/* Thumbnail Gallery */}
                   {allImages.length > 1 && (
-                    <div className="flex gap-2 p-4 overflow-x-auto bg-white border-t border-slate-200">
+                    <div className="flex gap-3 p-4 overflow-x-auto bg-white/50 border-t border-slate-200/50 scrollbar-hide">
                       {allImages.map((img, idx) => (
                         <button
                           key={idx}
-                          onClick={() => setCurrentImageIndex(idx)}
-                          className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                            idx === currentImageIndex ? 'border-slate-900' : 'border-transparent opacity-60 hover:opacity-100'
+                          onClick={() => {
+                            setCurrentImageIndex(idx);
+                            setImageLoading(true);
+                          }}
+                          className={`flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border-2 transition-all shadow-sm ${
+                            idx === currentImageIndex 
+                              ? 'border-slate-900 shadow-md scale-105' 
+                              : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
                           }`}
+                          aria-label={`Миниатюра ${idx + 1}`}
                         >
-                          <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                          <img 
+                            src={img} 
+                            alt={`Миниатюра ${idx + 1}`} 
+                            className="w-full h-full object-cover" 
+                          />
                         </button>
                       ))}
                     </div>
@@ -210,74 +267,95 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                 </div>
 
                 {/* Car Details */}
-                <div className="lg:w-1/2 overflow-y-auto">
-                  <div className="p-6 sm:p-8">
-                    <div className="mb-6">
-                      <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">
-                        {car.name} {car.color} {car.year}
+                <div className="lg:w-1/2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
+                  <div className="p-6 sm:p-8 lg:p-10">
+                    {/* Header */}
+                    <div className="mb-8">
+                      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 leading-tight">
+                        {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
                       </h2>
-                      <p className="text-lg text-slate-500">{car.model}</p>
+                      <p className="text-lg sm:text-xl text-slate-500 font-medium">{car.model}</p>
                     </div>
 
                     {/* Pricing */}
-                    <div className="mb-6 pb-6 border-b border-slate-200">
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-4xl font-bold text-slate-900">{car.priceDay} AED</span>
+                    <div className="mb-8 pb-8 border-b border-slate-200">
+                      <div className="flex items-baseline gap-3 mb-4">
+                        <span className="text-4xl sm:text-5xl font-bold text-slate-900">{car.priceDay}</span>
+                        <span className="text-xl sm:text-2xl text-slate-600 font-medium">AED</span>
                         <span className="text-lg text-slate-500">/ день</span>
                         {car.oldPrice && (
-                          <span className="text-lg text-slate-400 line-through ml-2">{car.oldPrice} AED</span>
+                          <span className="text-lg sm:text-xl text-slate-400 line-through ml-3">{car.oldPrice} AED</span>
                         )}
                       </div>
-                      <div className="flex gap-6 text-sm text-slate-600">
-                        <div>
-                          <span className="font-semibold">Неделя:</span> {car.priceWeek} AED
+                      <div className="flex flex-wrap gap-4 sm:gap-6 text-sm sm:text-base">
+                        <div className="bg-slate-50 px-4 py-2 rounded-xl">
+                          <span className="text-slate-600">Неделя:</span>
+                          <span className="font-semibold text-slate-900 ml-2">{car.priceWeek} AED</span>
                         </div>
-                        <div>
-                          <span className="font-semibold">Месяц:</span> {car.priceMonth} AED
+                        <div className="bg-slate-50 px-4 py-2 rounded-xl">
+                          <span className="text-slate-600">Месяц:</span>
+                          <span className="font-semibold text-slate-900 ml-2">{car.priceMonth} AED</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Specs */}
-                    <div className="mb-6 pb-6 border-b border-slate-200">
-                      <h3 className="text-xl font-semibold text-slate-900 mb-4">Характеристики</h3>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center">
-                          <Gauge className="w-6 h-6 text-slate-400 mx-auto mb-2" />
-                          <p className="text-sm text-slate-600">{car.specs.maxSpeed}</p>
+                    <div className="mb-8 pb-8 border-b border-slate-200">
+                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Характеристики</h3>
+                      <div className="grid grid-cols-3 gap-4 sm:gap-6">
+                        <div className="text-center p-4 bg-slate-50 rounded-2xl">
+                          <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                            <Gauge className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-600 font-medium">{car.specs.maxSpeed}</p>
                         </div>
-                        <div className="text-center">
-                          <Fuel className="w-6 h-6 text-slate-400 mx-auto mb-2" />
-                          <p className="text-sm text-slate-600">{car.specs.fuelConsumption}</p>
+                        <div className="text-center p-4 bg-slate-50 rounded-2xl">
+                          <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                            <Fuel className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-600 font-medium">{car.specs.fuelConsumption}</p>
                         </div>
-                        <div className="text-center">
-                          <Route className="w-6 h-6 text-slate-400 mx-auto mb-2" />
-                          <p className="text-sm text-slate-600">{car.specs.mileageLimit}</p>
+                        <div className="text-center p-4 bg-slate-50 rounded-2xl">
+                          <div className="w-12 h-12 mx-auto mb-3 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                            <Route className="w-6 h-6 text-slate-700" strokeWidth={1.5} />
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-600 font-medium">{car.specs.mileageLimit}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Features */}
-                    <div className="mb-6 pb-6 border-b border-slate-200">
-                      <h3 className="text-xl font-semibold text-slate-900 mb-4">Особенности</h3>
-                      <ul className="space-y-2">
+                    <div className="mb-8 pb-8 border-b border-slate-200">
+                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Особенности</h3>
+                      <ul className="space-y-3">
                         {car.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
-                            <Check className="w-5 h-5 text-slate-900 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                            <span>{feature}</span>
+                          <li key={idx} className="flex items-start gap-3 text-sm sm:text-base text-slate-700">
+                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <Check className="w-4 h-4 text-green-600" strokeWidth={2.5} />
+                            </div>
+                            <span className="leading-relaxed">{feature}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
 
                     {/* Conditions */}
-                    <div className="mb-6">
-                      <h3 className="text-xl font-semibold text-slate-900 mb-4">Условия аренды</h3>
-                      <ul className="space-y-2 text-sm text-slate-700">
-                        <li>Возраст арендатора: от {car.conditions.minAge} года</li>
-                        <li>Стаж вождения: от {car.conditions.minExperience} года</li>
-                        <li>Ограничение пробега: {car.conditions.mileageLimit}</li>
-                      </ul>
+                    <div className="mb-8">
+                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Условия аренды</h3>
+                      <div className="space-y-3 bg-slate-50 p-5 rounded-2xl">
+                        <div className="flex items-center gap-3 text-sm sm:text-base text-slate-700">
+                          <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                          <span>Возраст арендатора: <strong className="text-slate-900">от {car.conditions.minAge} года</strong></span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm sm:text-base text-slate-700">
+                          <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                          <span>Стаж вождения: <strong className="text-slate-900">от {car.conditions.minExperience} года</strong></span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm sm:text-base text-slate-700">
+                          <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                          <span>Ограничение пробега: <strong className="text-slate-900">{car.conditions.mileageLimit}</strong></span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* CTA Button */}
@@ -285,9 +363,9 @@ const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void
                       href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-base font-semibold"
+                      className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                     >
-                      <MessageCircle className="w-5 h-5" />
+                      <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                       Забронировать в WhatsApp
                     </a>
                   </div>
@@ -873,53 +951,62 @@ export function RentPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden border border-slate-200/50 hover:border-slate-900/50 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer"
+                className="bg-white rounded-3xl overflow-hidden border border-slate-200/50 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group"
+                whileHover={{ y: -8 }}
                 onClick={() => openModal(car)}
               >
                 {/* Car Image */}
-                <div className="relative h-48 sm:h-56 overflow-hidden bg-slate-100">
+                <div className="relative h-56 sm:h-64 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
                   <CarImage
                     car={car}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   {car.oldPrice && (
-                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
                       -{Math.round((1 - car.priceDay / car.oldPrice) * 100)}%
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
                 {/* Car Info */}
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">
-                      {car.name} {car.color} {car.year}
+                <div className="p-6 sm:p-7">
+                  <div className="mb-5">
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1.5 leading-tight">
+                      {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
                     </h3>
-                    <p className="text-sm text-slate-500">{car.model}</p>
+                    <p className="text-sm sm:text-base text-slate-500 font-medium">{car.model}</p>
                   </div>
 
                   {/* Specs */}
-                  <div className="grid grid-cols-3 gap-3 mb-4 pb-4 border-b border-slate-200">
-                    <div className="text-center">
-                      <Gauge className="w-5 h-5 text-slate-400 mx-auto mb-1" />
-                      <p className="text-xs text-slate-600">{car.specs.maxSpeed}</p>
+                  <div className="grid grid-cols-3 gap-3 mb-5 pb-5 border-b border-slate-200">
+                    <div className="text-center p-2 bg-slate-50 rounded-xl">
+                      <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                        <Gauge className="w-4 h-4 text-slate-600" strokeWidth={2} />
+                      </div>
+                      <p className="text-xs text-slate-700 font-medium leading-tight">{car.specs.maxSpeed}</p>
                     </div>
-                    <div className="text-center">
-                      <Fuel className="w-5 h-5 text-slate-400 mx-auto mb-1" />
-                      <p className="text-xs text-slate-600">{car.specs.fuelConsumption}</p>
+                    <div className="text-center p-2 bg-slate-50 rounded-xl">
+                      <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                        <Fuel className="w-4 h-4 text-slate-600" strokeWidth={2} />
+                      </div>
+                      <p className="text-xs text-slate-700 font-medium leading-tight">{car.specs.fuelConsumption}</p>
                     </div>
-                    <div className="text-center">
-                      <Route className="w-5 h-5 text-slate-400 mx-auto mb-1" />
-                      <p className="text-xs text-slate-600">{car.specs.mileageLimit}</p>
+                    <div className="text-center p-2 bg-slate-50 rounded-xl">
+                      <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                        <Route className="w-4 h-4 text-slate-600" strokeWidth={2} />
+                      </div>
+                      <p className="text-xs text-slate-700 font-medium leading-tight">{car.specs.mileageLimit}</p>
                     </div>
                   </div>
 
                   {/* Pricing */}
-                  <div className="mb-4">
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-2xl sm:text-3xl font-bold text-slate-900">
-                        {car.priceDay} AED
+                  <div className="mb-5">
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-3xl sm:text-4xl font-bold text-slate-900">
+                        {car.priceDay}
                       </span>
+                      <span className="text-lg text-slate-600 font-medium">AED</span>
                       <span className="text-sm text-slate-500">/ день</span>
                       {car.oldPrice && (
                         <span className="text-sm text-slate-400 line-through ml-2">
@@ -927,19 +1014,21 @@ export function RentPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-4 text-xs text-slate-600">
-                      <span>Неделя: {car.priceWeek} AED</span>
-                      <span>Месяц: {car.priceMonth} AED</span>
+                    <div className="flex gap-3 text-xs sm:text-sm text-slate-600">
+                      <span className="bg-slate-50 px-3 py-1 rounded-lg">Неделя: <strong className="text-slate-900">{car.priceWeek}</strong> AED</span>
+                      <span className="bg-slate-50 px-3 py-1 rounded-lg">Месяц: <strong className="text-slate-900">{car.priceMonth}</strong> AED</span>
                     </div>
                   </div>
 
                   {/* Features Preview */}
-                  <div className="mb-4">
-                    <ul className="space-y-1">
+                  <div className="mb-5">
+                    <ul className="space-y-2">
                       {car.features.slice(0, 3).map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
-                          <Check className="w-4 h-4 text-slate-900 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                          <span>{feature}</span>
+                        <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={2.5} />
+                          </div>
+                          <span className="leading-relaxed">{feature}</span>
                         </li>
                       ))}
                     </ul>
@@ -950,9 +1039,10 @@ export function RentPage() {
                     href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-sm font-semibold"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     Забронировать в WhatsApp
                   </a>
                 </div>
