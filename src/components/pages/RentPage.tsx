@@ -788,4 +788,3 @@ export function RentPage() {
     </div>
   );
 }
-}
