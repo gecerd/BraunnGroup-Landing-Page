@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Clock, Shield, Star, Check, Gauge, Fuel, Route, MessageCircle } from 'lucide-react';
 
@@ -26,6 +26,70 @@ interface Car {
   };
 }
 
+// Fallback images mapping
+const getFallbackImage = (car: Car): string => {
+  const model = car.model.toLowerCase();
+  const color = car.color.toLowerCase();
+  
+  // MG 3 images
+  if (model.includes('mg 3')) {
+    if (color.includes('blue')) return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+    if (color.includes('black')) return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+    if (color.includes('grey') || color.includes('gray')) return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+  }
+  
+  // MG 5 images
+  if (model.includes('mg 5')) {
+    return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+  }
+  
+  // MG GT images
+  if (model.includes('mg gt')) {
+    return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+  }
+  
+  // MG ZS images
+  if (model.includes('mg zs')) {
+    return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+  }
+  
+  // MG RX5 images
+  if (model.includes('mg rx5')) {
+    return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+  }
+  
+  // JETOUR T2 images
+  if (model.includes('jetour') || model.includes('t2')) {
+    return 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop&q=80';
+  }
+  
+  // Default fallback
+  return 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80';
+};
+
+// Car Image Component with fallback
+const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className = '' }) => {
+  const [imgSrc, setImgSrc] = useState(car.image);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true);
+      setImgSrc(getFallbackImage(car));
+    }
+  };
+
+  return (
+    <img
+      src={imgSrc}
+      alt={`${car.name} ${car.color} ${car.year}`}
+      className={className}
+      onError={handleError}
+      loading="lazy"
+    />
+  );
+};
+
 export function RentPage() {
   const cars: Car[] = [
     {
@@ -34,7 +98,7 @@ export function RentPage() {
       model: 'MG 3',
       year: 2024,
       color: 'Blue',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80',
+      image: 'https://brauncar.com/images/cars/mg3-blue.jpg',
       priceDay: 145,
       priceWeek: 890,
       priceMonth: 2250,
@@ -45,12 +109,15 @@ export function RentPage() {
         mileageLimit: '250 км/день',
       },
       features: [
-        'Современный дизайн',
-        'Экономичный двигатель',
-        'Просторный салон',
-        'Большой сенсорный экран',
-        'Bluetooth & USB',
+        'Кондиционер',
+        'Экономичный двигатель 1.5L',
+        'Камера заднего вида',
+        'Apple CarPlay & Bluetooth',
         'Система Isofix',
+        'Электропакет',
+        'USB-порт',
+        'Стильный дизайн',
+        'Маневренность',
       ],
       conditions: {
         minAge: 21,
@@ -64,7 +131,7 @@ export function RentPage() {
       model: 'MG 3',
       year: 2024,
       color: 'Black',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80',
+      image: 'https://brauncar.com/images/cars/mg3-black.jpg',
       priceDay: 145,
       priceWeek: 890,
       priceMonth: 2250,
@@ -75,12 +142,15 @@ export function RentPage() {
         mileageLimit: '250 км/день',
       },
       features: [
-        'Современный дизайн',
-        'Экономичный двигатель',
-        'Просторный салон',
-        'Большой сенсорный экран',
-        'Bluetooth & USB',
+        'Кондиционер',
+        'Экономичный двигатель 1.5L',
+        'Камера заднего вида',
+        'Apple CarPlay & Bluetooth',
         'Система Isofix',
+        'Электропакет',
+        'USB-порт',
+        'Стильный дизайн',
+        'Маневренность',
       ],
       conditions: {
         minAge: 21,
@@ -94,7 +164,7 @@ export function RentPage() {
       model: 'MG 3',
       year: 2024,
       color: 'Grey',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80',
+      image: 'https://brauncar.com/images/cars/mg3-grey.jpg',
       priceDay: 145,
       priceWeek: 890,
       priceMonth: 2250,
@@ -105,12 +175,15 @@ export function RentPage() {
         mileageLimit: '250 км/день',
       },
       features: [
-        'Современный дизайн',
-        'Экономичный двигатель',
-        'Просторный салон',
-        'Большой сенсорный экран',
-        'Bluetooth & USB',
+        'Кондиционер',
+        'Экономичный двигатель 1.5L',
+        'Камера заднего вида',
+        'Apple CarPlay & Bluetooth',
         'Система Isofix',
+        'Электропакет',
+        'USB-порт',
+        'Стильный дизайн',
+        'Маневренность',
       ],
       conditions: {
         minAge: 21,
@@ -124,13 +197,280 @@ export function RentPage() {
       model: 'MG 5',
       year: 2023,
       color: 'Silver',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0ad6?w=800&h=600&fit=crop&q=80&auto=format',
-      priceDay: 200,
-      priceWeek: 1200,
-      priceMonth: 3000,
+      image: 'https://brauncar.com/images/cars/mg5-silver.jpg',
+      priceDay: 160,
+      priceWeek: 950,
+      priceMonth: 2350,
+      oldPrice: 180,
       specs: {
         maxSpeed: '~170 км/час',
-        fuelConsumption: '8,2 литра',
+        fuelConsumption: '6,3 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Кондиционер',
+        'Экономичный двигатель 1.5L',
+        'Камера заднего вида',
+        'Apple CarPlay & Bluetooth',
+        'Система Isofix',
+        'Электропакет',
+        'USB-порт',
+        'Стильный дизайн',
+        'Маневренность',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg5-white',
+      name: 'MG 5',
+      model: 'MG 5',
+      year: 2024,
+      color: 'White',
+      image: 'https://brauncar.com/images/cars/mg5-white.jpg',
+      priceDay: 160,
+      priceWeek: 950,
+      priceMonth: 2350,
+      oldPrice: 180,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '7,7 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Мощный кондиционер',
+        'Вместительный седан',
+        'Экономичный двигатель 1.5L',
+        'Камера заднего вида',
+        'Apple CarPlay & Bluetooth',
+        'Электропакет',
+        'Система Isofix',
+        'USB-порт',
+        'Стильный и элегантный дизайн',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-gt-blue',
+      name: 'MG GT',
+      model: 'MG GT',
+      year: 2024,
+      color: 'Blue',
+      image: 'https://brauncar.com/images/cars/mg-gt-blue.jpg',
+      priceDay: 180,
+      priceWeek: 1050,
+      priceMonth: 2800,
+      oldPrice: 220,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '5,9 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Мощный кондиционер',
+        'Спортивный дизайн',
+        'Двигатель 1.5L Turbo',
+        'Камера заднего вида',
+        'Apple CarPlay & Android Auto',
+        'Bluetooth и USB',
+        'Электрические стеклоподъемники',
+        'Система Isofix',
+        'Спортивный интерьер',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-gt-red',
+      name: 'MG GT',
+      model: 'MG GT',
+      year: 2024,
+      color: 'Red',
+      image: 'https://brauncar.com/images/cars/mg-gt-red.jpg',
+      priceDay: 180,
+      priceWeek: 1050,
+      priceMonth: 2800,
+      oldPrice: 220,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '5,9 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Мощный кондиционер',
+        'Спортивный дизайн',
+        'Двигатель 1.5L Turbo',
+        'Камера заднего вида',
+        'Apple CarPlay & Android Auto',
+        'Bluetooth и USB',
+        'Электрические стеклоподъемники',
+        'Система Isofix',
+        'Спортивный интерьер',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-gt-white',
+      name: 'MG GT',
+      model: 'MG GT',
+      year: 2024,
+      color: 'White',
+      image: 'https://brauncar.com/images/cars/mg-gt-white.jpg',
+      priceDay: 180,
+      priceWeek: 1050,
+      priceMonth: 2800,
+      oldPrice: 220,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '5,9 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Мощный кондиционер',
+        'Спортивный дизайн',
+        'Двигатель 1.5L Turbo',
+        'Камера заднего вида',
+        'Apple CarPlay & Android Auto',
+        'Bluetooth и USB',
+        'Электрические стеклоподъемники',
+        'Система Isofix',
+        'Спортивный интерьер',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-gt-black',
+      name: 'MG GT',
+      model: 'MG GT',
+      year: 2024,
+      color: 'Black',
+      image: 'https://brauncar.com/images/cars/mg-gt-black.jpg',
+      priceDay: 180,
+      priceWeek: 1050,
+      priceMonth: 2800,
+      oldPrice: 220,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '5,9 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Мощный кондиционер',
+        'Спортивный дизайн',
+        'Двигатель 1.5L Turbo',
+        'Камера заднего вида',
+        'Apple CarPlay & Android Auto',
+        'Bluetooth и USB',
+        'Электрические стеклоподъемники',
+        'Система Isofix',
+        'Спортивный интерьер',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-zs-silver',
+      name: 'MG ZS',
+      model: 'MG ZS',
+      year: 2024,
+      color: 'Silver',
+      image: 'https://brauncar.com/images/cars/mg-zs-silver.jpg',
+      priceDay: 185,
+      priceWeek: 1100,
+      priceMonth: 2900,
+      oldPrice: 230,
+      specs: {
+        maxSpeed: '~190 км/час',
+        fuelConsumption: '7,8 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Просторный салон и багажник',
+        'Экономичный двигатель 1.5L',
+        'Мощный кондиционер',
+        'Большой мультимедийный экран',
+        'Apple CarPlay и Android Auto',
+        'Камера заднего вида',
+        'Bluetooth & USB',
+        'Электропакет',
+        'Система Isofix',
+        'Стильный современный дизайн',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-zs-white',
+      name: 'MG ZS',
+      model: 'MG ZS',
+      year: 2024,
+      color: 'White',
+      image: 'https://brauncar.com/images/cars/mg-zs-white.jpg',
+      priceDay: 185,
+      priceWeek: 1100,
+      priceMonth: 2900,
+      oldPrice: 230,
+      specs: {
+        maxSpeed: '~190 км/час',
+        fuelConsumption: '7,8 литра',
+        mileageLimit: '250 км/день',
+      },
+      features: [
+        'Просторный салон и багажник',
+        'Экономичный двигатель 1.5L',
+        'Мощный кондиционер',
+        'Большой мультимедийный экран',
+        'Apple CarPlay и Android Auto',
+        'Камера заднего вида',
+        'Bluetooth & USB',
+        'Электропакет',
+        'Система Isofix',
+        'Стильный современный дизайн',
+      ],
+      conditions: {
+        minAge: 21,
+        minExperience: 1,
+        mileageLimit: '4500 км/месяц ; 250 км/день',
+      },
+    },
+    {
+      id: 'mg-rx5',
+      name: 'MG RX5',
+      model: 'MG RX5',
+      year: 2024,
+      color: '',
+      image: 'https://brauncar.com/images/cars/mg-rx5.jpg',
+      priceDay: 235,
+      priceWeek: 1380,
+      priceMonth: 3950,
+      oldPrice: 280,
+      specs: {
+        maxSpeed: '~180 км/час',
+        fuelConsumption: '14,7 литра',
         mileageLimit: '250 км/день',
       },
       features: [
@@ -143,6 +483,7 @@ export function RentPage() {
         'Bluetooth & USB',
         'Электропакет',
         'Система Isofix',
+        'Современный дизайн',
       ],
       conditions: {
         minAge: 21,
@@ -156,7 +497,7 @@ export function RentPage() {
       model: 'JETOUR T2',
       year: 2026,
       color: 'Sand',
-      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop&q=80&auto=format',
+      image: 'https://brauncar.com/images/cars/jetour-t2.jpg',
       priceDay: 533,
       priceWeek: 3240,
       priceMonth: 8000,
@@ -168,7 +509,7 @@ export function RentPage() {
       },
       features: [
         'Внедорожный дизайн',
-        'Полный привод',
+        'Полный привод и повышенная проходимость',
         'Просторный салон с премиальной отделкой',
         'Мощный турбированный двигатель 2.0L',
         'Панорамная камера 360°',
@@ -294,9 +635,8 @@ export function RentPage() {
               >
                 {/* Car Image */}
                 <div className="relative h-48 sm:h-56 overflow-hidden bg-slate-100">
-                  <img
-                    src={car.image}
-                    alt={`${car.name} ${car.color} ${car.year}`}
+                  <CarImage
+                    car={car}
                     className="w-full h-full object-cover"
                   />
                   {car.oldPrice && (
