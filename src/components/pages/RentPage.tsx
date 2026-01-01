@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Clock, Shield, Star, Check, Gauge, Fuel, Route, MessageCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Clock, Shield, Star, Check, MessageCircle } from 'lucide-react';
 
 interface Car {
   id: string;
@@ -129,278 +129,7 @@ const CarImage: React.FC<{ car: Car; className?: string }> = ({ car, className =
   );
 };
 
-// Car Modal Component - полностью переделанный дизайн
-const CarModal: React.FC<{ car: Car | null; isOpen: boolean; onClose: () => void }> = ({ car, isOpen, onClose }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(true);
-
-  // Закрытие по Escape
-  React.useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
-
-  if (!car) return null;
-
-  const allImages = car.images && car.images.length > 0 ? car.images : [car.image];
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-    setImageLoading(true);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-    setImageLoading(true);
-  };
-
-  const handleImageLoad = () => {
-    setImageLoading(false);
-  };
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="relative w-full max-w-5xl h-[90vh] sm:h-[85vh] bg-white rounded-2xl overflow-hidden shadow-2xl pointer-events-auto flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button
-                onClick={onClose}
-                className="absolute top-3 right-3 z-30 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all border border-slate-200"
-                aria-label="Закрыть"
-              >
-                <X className="w-4 h-4 text-slate-700" strokeWidth={2.5} />
-              </button>
-
-              <div className="flex flex-col lg:flex-row h-full overflow-hidden">
-                {/* Image Gallery */}
-                <div className="relative lg:w-1/2 bg-slate-100 flex-shrink-0">
-                  <div className="relative w-full h-64 sm:h-80 lg:h-full">
-                    {imageLoading && (
-                      <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center">
-                        <div className="w-16 h-16 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                    <img
-                      src={allImages[currentImageIndex]}
-                      alt={`${car.name} ${car.color} ${car.year} - Изображение ${currentImageIndex + 1}`}
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                      onLoad={handleImageLoad}
-                      onError={() => {
-                        setImageLoading(false);
-                        // Try fallback
-                        const fallback = getFallbackImage(car);
-                        if (fallback !== allImages[currentImageIndex]) {
-                          allImages[currentImageIndex] = fallback;
-                        }
-                      }}
-                    />
-                    {allImages.length > 1 && (
-                      <>
-                        <button
-                          onClick={prevImage}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all border border-slate-200 z-10"
-                          aria-label="Предыдущее изображение"
-                        >
-                          <ChevronLeft className="w-5 h-5 text-slate-700" strokeWidth={2} />
-                        </button>
-                        <button
-                          onClick={nextImage}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all border border-slate-200 z-10"
-                          aria-label="Следующее изображение"
-                        >
-                          <ChevronRight className="w-5 h-5 text-slate-700" strokeWidth={2} />
-                        </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-white/90 backdrop-blur-sm px-2 py-1.5 rounded-full">
-                          {allImages.map((_, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => {
-                                setCurrentImageIndex(idx);
-                                setImageLoading(true);
-                              }}
-                              className={`h-1.5 rounded-full transition-all ${
-                                idx === currentImageIndex ? 'bg-slate-900 w-6' : 'bg-slate-400 w-1.5 hover:bg-slate-600'
-                              }`}
-                              aria-label={`Изображение ${idx + 1}`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Car Details - Scrollable */}
-                <div className="lg:w-1/2 flex flex-col min-h-0">
-                  <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
-                    {/* Header */}
-                    <div className="mb-4 sm:mb-6">
-                      <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1.5 leading-tight">
-                        {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
-                      </h2>
-                      <p className="text-base sm:text-lg text-slate-500">{car.model}</p>
-                    </div>
-
-                    {/* Pricing */}
-                    <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200">
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-3xl sm:text-4xl font-bold text-slate-900">{car.priceDay}</span>
-                        <span className="text-lg sm:text-xl text-slate-600 font-medium">AED</span>
-                        <span className="text-sm sm:text-base text-slate-500">/ день</span>
-                        {car.oldPrice && (
-                          <span className="text-base sm:text-lg text-slate-400 line-through ml-2">{car.oldPrice} AED</span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
-                        <div className="bg-slate-50 px-3 py-1.5 rounded-lg">
-                          <span className="text-slate-600">Неделя:</span>
-                          <span className="font-semibold text-slate-900 ml-1.5">{car.priceWeek} AED</span>
-                        </div>
-                        <div className="bg-slate-50 px-3 py-1.5 rounded-lg">
-                          <span className="text-slate-600">Месяц:</span>
-                          <span className="font-semibold text-slate-900 ml-1.5">{car.priceMonth} AED</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Specs */}
-                    <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200">
-                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Характеристики</h3>
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                        <div className="text-center p-2 sm:p-3 bg-slate-50 rounded-xl">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                            <Gauge className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" strokeWidth={1.5} />
-                          </div>
-                          <p className="text-xs text-slate-600 font-medium leading-tight">{car.specs.maxSpeed}</p>
-                        </div>
-                        <div className="text-center p-2 sm:p-3 bg-slate-50 rounded-xl">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                            <Fuel className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" strokeWidth={1.5} />
-                          </div>
-                          <p className="text-xs text-slate-600 font-medium leading-tight">{car.specs.fuelConsumption}</p>
-                        </div>
-                        <div className="text-center p-2 sm:p-3 bg-slate-50 rounded-xl">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center border border-slate-200">
-                            <Route className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" strokeWidth={1.5} />
-                          </div>
-                          <p className="text-xs text-slate-600 font-medium leading-tight">{car.specs.mileageLimit}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Features */}
-                    <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200">
-                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Особенности</h3>
-                      <ul className="space-y-2">
-                        {car.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
-                            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <Check className="w-3.5 h-3.5 text-green-600" strokeWidth={2.5} />
-                            </div>
-                            <span className="leading-relaxed">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Conditions */}
-                    <div className="mb-4 sm:mb-6">
-                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Условия аренды</h3>
-                      <div className="space-y-2 bg-slate-50 p-3 sm:p-4 rounded-xl">
-                        <div className="flex items-center gap-2.5 text-sm text-slate-700">
-                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></div>
-                          <span>Возраст: <strong className="text-slate-900">от {car.conditions.minAge} года</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2.5 text-sm text-slate-700">
-                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></div>
-                          <span>Стаж: <strong className="text-slate-900">от {car.conditions.minExperience} года</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2.5 text-sm text-slate-700">
-                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 flex-shrink-0"></div>
-                          <span>Пробег: <strong className="text-slate-900">{car.conditions.mileageLimit}</strong></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Fixed CTA Button */}
-                  <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 bg-white">
-                    <a
-                      href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full transition-all duration-200 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg"
-                    >
-                      <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Забронировать в WhatsApp
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-};
-
 export function RentPage() {
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [carImagesMap, setCarImagesMap] = useState<Record<string, string[]>>({});
-
-  // Load images.json if available
-  React.useEffect(() => {
-    fetch('/cars/images.json')
-      .then(res => res.json())
-      .then(data => setCarImagesMap(data))
-      .catch(() => {
-        // File doesn't exist or failed to load, that's okay
-        console.log('images.json not found, using default images');
-      });
-  }, []);
-
-  const openModal = (car: Car) => {
-    // Load local images if available
-    const localImages = carImagesMap[car.id];
-    const carWithImages = localImages && localImages.length > 0
-      ? { ...car, images: localImages }
-      : car;
-    
-    setSelectedCar(carWithImages);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedCar(null), 300);
-  };
 
   const cars: Car[] = [
     {
@@ -942,9 +671,8 @@ export function RentPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-lg cursor-pointer group flex flex-col"
+                className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-slate-300 transition-all duration-300 shadow-sm hover:shadow-lg group flex flex-col"
                 whileHover={{ y: -4 }}
-                onClick={() => openModal(car)}
               >
                 {/* Car Image */}
                 <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
@@ -959,6 +687,14 @@ export function RentPage() {
                   )}
                 </div>
 
+                {/* Additional Car Image */}
+                <div className="relative h-32 sm:h-36 overflow-hidden bg-slate-100">
+                  <CarImage
+                    car={car}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+
                 {/* Car Info */}
                 <div className="p-4 sm:p-5 flex-1 flex flex-col">
                   <div className="mb-3">
@@ -966,22 +702,6 @@ export function RentPage() {
                       {car.name} {car.color && <span className="text-slate-600">{car.color}</span>} {car.year}
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-500">{car.model}</p>
-                  </div>
-
-                  {/* Specs - Compact */}
-                  <div className="grid grid-cols-3 gap-2 mb-3 pb-3 border-b border-slate-200">
-                    <div className="text-center">
-                      <Gauge className="w-4 h-4 text-slate-500 mx-auto mb-1" strokeWidth={2} />
-                      <p className="text-xs text-slate-600 leading-tight">{car.specs.maxSpeed}</p>
-                    </div>
-                    <div className="text-center">
-                      <Fuel className="w-4 h-4 text-slate-500 mx-auto mb-1" strokeWidth={2} />
-                      <p className="text-xs text-slate-600 leading-tight">{car.specs.fuelConsumption}</p>
-                    </div>
-                    <div className="text-center">
-                      <Route className="w-4 h-4 text-slate-500 mx-auto mb-1" strokeWidth={2} />
-                      <p className="text-xs text-slate-600 leading-tight">{car.specs.mileageLimit}</p>
-                    </div>
                   </div>
 
                   {/* Pricing - Compact */}
@@ -1034,9 +754,6 @@ export function RentPage() {
           </div>
         </div>
       </section>
-
-      {/* Car Modal */}
-      <CarModal car={selectedCar} isOpen={isModalOpen} onClose={closeModal} />
 
       {/* Features */}
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
