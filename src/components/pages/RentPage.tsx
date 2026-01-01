@@ -670,60 +670,70 @@ export function RentPage() {
                 <div className="bg-white p-6 flex-1 flex flex-col">
                   {/* Car Title */}
                   <div className="mb-5">
-                    <h3 className="text-2xl font-bold text-slate-900 mb-1 leading-tight">
-                      {car.name} {car.color && <span className="text-slate-600 font-normal">{car.color}</span>} {car.year}
-                    </h3>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-3xl font-bold text-slate-900">{car.name.split(' ')[0]}</span>
+                      <span className="text-3xl font-bold text-slate-900">{car.name.split(' ')[1] || ''}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      {car.color && <span className="text-xl font-semibold text-slate-700">{car.color}</span>}
+                      <span className="text-xl font-semibold text-slate-700">{car.year}</span>
+                    </div>
                   </div>
 
-                  {/* Specs */}
+                  {/* Specs and Pricing Row */}
                   <div className="mb-5 pb-5 border-b border-slate-200">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <p className="text-xs text-slate-600 mb-1.5 leading-tight">Максимальная скорость</p>
-                        <p className="text-sm font-semibold text-slate-900 leading-tight">{car.specs.maxSpeed}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Specs - Left */}
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1"><strong>Максимальная скорость:</strong></p>
+                          <p className="text-sm font-semibold text-slate-900">{car.specs.maxSpeed}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1"><strong>Средний расход топлива:</strong></p>
+                          <p className="text-sm font-semibold text-slate-900">{car.specs.fuelConsumption}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-600 mb-1"><strong>Ограничение пробега:</strong></p>
+                          <p className="text-sm font-semibold text-slate-900">{car.specs.mileageLimit}</p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs text-slate-600 mb-1.5 leading-tight">Средний расход топлива</p>
-                        <p className="text-sm font-semibold text-slate-900 leading-tight">{car.specs.fuelConsumption}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-slate-600 mb-1.5 leading-tight">Ограничение пробега</p>
-                        <p className="text-sm font-semibold text-slate-900 leading-tight">{car.specs.mileageLimit}</p>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Pricing */}
-                  <div className="mb-5">
-                    <div className="flex items-baseline gap-2 mb-4">
-                      <span className="text-4xl font-bold text-slate-900">
-                        {car.priceDay}
-                      </span>
-                      <span className="text-xl text-slate-600 font-medium">AED</span>
-                      <span className="text-base text-slate-500">.</span>
-                      {car.oldPrice && (
-                        <span className="text-xl text-slate-400 line-through ml-3">
-                          {car.oldPrice} AED.
-                        </span>
-                      )}
-                    </div>
-                    <div className="space-y-1.5 text-sm text-slate-600">
-                      <div><strong className="text-slate-900">Сутки -</strong> {car.priceDay} aed</div>
-                      <div><strong className="text-slate-900">Неделя -</strong> {car.priceWeek} aed</div>
-                      <div><strong className="text-slate-900">Месяц -</strong> {car.priceMonth} aed</div>
+                      {/* Pricing - Right */}
+                      <div>
+                        <div className="mb-3">
+                          <p className="text-xs text-slate-600 mb-2">цена в день</p>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-slate-900">
+                              {car.priceDay}
+                            </span>
+                            <span className="text-xl text-slate-600 font-medium">AED.</span>
+                            {car.oldPrice && (
+                              <span className="text-xl text-slate-400 line-through ml-2">
+                                {car.oldPrice} AED.
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-sm text-slate-600">
+                          <div><strong className="text-slate-900">Сутки -</strong> {car.priceDay} aed</div>
+                          <div><strong className="text-slate-900">Неделя -</strong> {car.priceWeek} aed</div>
+                          <div><strong className="text-slate-900">Месяц -</strong> {car.priceMonth.toLocaleString('ru-RU')} aed</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Buttons */}
-                  <div className="flex gap-3 mt-auto pt-2">
-                    <button className="flex-1 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm hover:shadow-md">
+                  <div className="flex gap-3 mt-auto">
+                    <button className="flex-1 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all duration-200 text-sm font-semibold">
                       Подробнее
                     </button>
                     <a
                       href={`https://wa.me/971585717758?text=Здравствуйте! Меня интересует аренда ${car.name} ${car.color} ${car.year}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-slate-900 hover:bg-slate-50 text-slate-900 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm hover:shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-slate-900 hover:bg-slate-50 text-slate-900 rounded-lg transition-all duration-200 text-sm font-semibold"
                     >
                       <MessageCircle className="w-4 h-4" strokeWidth={2} />
                       WhatsApp
