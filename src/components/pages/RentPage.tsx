@@ -328,29 +328,25 @@ export function RentPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {cars.map((car, index) => {
-              const carProps = {
-                name: car.name,
-                model: car.model,
-                color: car.color,
-                year: car.year,
-                image: car.image,
-                maxSpeed: car.maxSpeed,
-                fuelConsumption: car.fuelConsumption,
-                mileageLimit: car.mileageLimit,
-                priceDay: car.priceDay,
-                priceWeek: car.priceWeek,
-                priceMonth: car.priceMonth,
-                originalPrice: car.originalPrice,
-                discount: car.discount,
-              };
-              return (
-                <CarCard 
-                  key={`${car.model}-${car.color}-${car.year}-${index}`}
-                  {...carProps}
-                />
-              );
-            })}
+            {cars.map((car, index) => (
+              // @ts-ignore - key is a special React prop, not part of component props
+              <CarCard 
+                key={`${car.model}-${car.color}-${car.year}-${index}`}
+                name={car.name}
+                model={car.model}
+                color={car.color}
+                year={car.year}
+                image={car.image}
+                maxSpeed={car.maxSpeed}
+                fuelConsumption={car.fuelConsumption}
+                mileageLimit={car.mileageLimit}
+                priceDay={car.priceDay}
+                priceWeek={car.priceWeek}
+                priceMonth={car.priceMonth}
+                originalPrice={car.originalPrice}
+                discount={car.discount}
+              />
+            ))}
           </div>
 
           <motion.div
