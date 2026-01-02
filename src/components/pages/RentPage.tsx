@@ -247,8 +247,8 @@ export function RentPage() {
             href="https://wa.me/971585717758"
             target="_blank"
             rel="noopener noreferrer"
-              className="inline-block px-6 sm:px-10 md:px-12 lg:px-16 py-4 sm:py-5 md:py-6 bg-white text-slate-900 hover:bg-slate-100 transition-all text-xs sm:text-sm md:text-base tracking-wide font-semibold rounded-2xl shadow-xl hover:shadow-2xl w-full sm:w-auto"
-            whileHover={{ scale: 1.05, y: -2 }}
+            className="inline-block px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 hover:bg-slate-800 text-white transition-all text-xs sm:text-sm tracking-wider rounded-full"
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Забронировать авто
